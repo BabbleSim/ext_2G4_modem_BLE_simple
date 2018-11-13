@@ -1,0 +1,13 @@
+*.o
+*.a
+*.so
+*.d
+*.asv
+*.Tsymbols
+*.gcda
+*.gcno
+*~
+~*.~*
+.*project
+.settings/*
+octave-workspace

@@ -1,0 +1,4 @@
+ext_2G4_modem_BLE_simple: libUtilv1 \
+ ext_2G4_phy_v1 \
+ ext_2G4_libPhyComv1
+
