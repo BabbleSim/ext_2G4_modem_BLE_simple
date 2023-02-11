@@ -59,7 +59,7 @@ int main(int argc, char**argv){
   ModemObj = modem_init(argc-1, &argv[1], device_nbr, nbr_devices);
 
   Tx_List_container.tx_list = calloc(sizeof(tx_el_t), Ndevices);
-  Tx_List_container.used = calloc(sizeof(uint), Ndevices);
+  Tx_List_container.used = calloc(sizeof(tx_state_t), Ndevices);
   RxPowers = calloc(sizeof(double),Ndevices);
 
   desired_tx_nbr = 2;

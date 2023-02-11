@@ -525,7 +525,7 @@ uint32_t modem_digital_perf_ber(void *this, p2G4_radioparams_t *rx_radioparams, 
  *  tx_s           : Parameters of the transmission we are receiving (in case the sync. probability depends on any of them)
  */
 uint32_t modem_digital_perf_sync(void *this, p2G4_radioparams_t *rx_radioparams,
-                                 double SNR, p2G4_tx_t* tx_s) {
+                                 double SNR, p2G4_txv2_t* tx_s) {
   m_simple_status_t *mo_st = (m_simple_status_t *)this;
   mo_simple_args_t *args = &mo_st->args;
 
