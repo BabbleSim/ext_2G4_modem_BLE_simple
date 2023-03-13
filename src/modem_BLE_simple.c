@@ -238,6 +238,7 @@ static const uint TxSpecBW_WN80MHz = 200;
 static double noiseBW_from_modulation(uint modulation_type) {
   switch (modulation_type) {
     case P2G4_MOD_BLE:
+    case P2G4_MOD_154_250K_DSS: //Provisionally let's treat 15.4 like 1Mbps BLE
       return 1.1e6;
       break;
     case P2G4_MOD_BLE2M:
@@ -258,6 +259,7 @@ static void RxFilter_from_modulation(uint modulation_type, const double ** filte
 
   switch (modulation_type) {
     case P2G4_MOD_BLE:
+    case P2G4_MOD_154_250K_DSS: //Provisionally let's treat 15.4 like 1Mbps BLE
       *filter_attenuation = channel_filter_BLE;
       *filter_half_BW     = channel_filter_BW_BLE;
       break;
@@ -279,6 +281,7 @@ static void spectrum_from_modulation(uint modulation_type, const double **tx_spe
 
   switch (modulation_type) {
     case P2G4_MOD_BLE :
+    case P2G4_MOD_154_250K_DSS: //Provisionally let's treat 15.4 like 1Mbps BLE
       *tx_spectrum    = TxSpectrum_BLE;
       *tx_spec_halfBW = TxSpecBW_BLE;
       break;
