@@ -55,16 +55,18 @@ int main(int argc, char**argv){
   tx_l_c_t Tx_List_container;
   uint desired_tx_nbr;
   p2G4_radioparams_t RxRadioParams;
+  p2G4_modemdigparams_t rx_modem_params;
 
   ModemObj = modem_init(argc-1, &argv[1], device_nbr, nbr_devices);
 
   Tx_List_container.tx_list = calloc(sizeof(tx_el_t), Ndevices);
-  Tx_List_container.used = calloc(sizeof(tx_state_t), Ndevices);
+  Tx_List_container.used = calloc(sizeof(uint), Ndevices);
   RxPowers = calloc(sizeof(double),Ndevices);
 
   desired_tx_nbr = 2;
   Tx_List_container.used[2] = 1;
   RxRadioParams.modulation = P2G4_MOD_BLE;
+  rx_modem_params.modulation = P2G4_MOD_BLE;
   p2G4_freq_from_d( 2450, 0, &RxRadioParams.center_freq );
 
   for ( double level = -110; level < -60; level += 0.2 ) {
@@ -75,7 +77,7 @@ int main(int argc, char**argv){
     modem_analog_rx(ModemObj, &RxRadioParams, &OutputSNR, &Output_RSSI_power_level,
                     RxPowers, &Tx_List_container, desired_tx_nbr);
 
-    uint32_t BER_i = modem_digital_perf_ber(ModemObj, &RxRadioParams, OutputSNR);
+    uint32_t BER_i = modem_digital_perf_ber(ModemObj, &rx_modem_params, OutputSNR);
     double BER = ((double)BER_i)/RAND_PROB_1;
     fprintf(stdout,"%e %e %e\n",level, OutputSNR, BER);
   }

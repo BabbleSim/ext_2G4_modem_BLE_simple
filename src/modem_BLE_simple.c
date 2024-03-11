@@ -238,6 +238,7 @@ static const uint TxSpecBW_WN80MHz = 200;
 static double noiseBW_from_modulation(uint modulation_type) {
   switch (modulation_type) {
     case P2G4_MOD_BLE:
+    case P2G4_MOD_BLE_CODED:
     case P2G4_MOD_154_250K_DSS: //Provisionally let's treat 15.4 like 1Mbps BLE
       return 1.1e6;
       break;
@@ -259,6 +260,7 @@ static void RxFilter_from_modulation(uint modulation_type, const double ** filte
 
   switch (modulation_type) {
     case P2G4_MOD_BLE:
+    case P2G4_MOD_BLE_CODED:
     case P2G4_MOD_154_250K_DSS: //Provisionally let's treat 15.4 like 1Mbps BLE
       *filter_attenuation = channel_filter_BLE;
       *filter_half_BW     = channel_filter_BW_BLE;
@@ -281,6 +283,7 @@ static void spectrum_from_modulation(uint modulation_type, const double **tx_spe
 
   switch (modulation_type) {
     case P2G4_MOD_BLE :
+    case P2G4_MOD_BLE_CODED:
     case P2G4_MOD_154_250K_DSS: //Provisionally let's treat 15.4 like 1Mbps BLE
       *tx_spectrum    = TxSpectrum_BLE;
       *tx_spec_halfBW = TxSpecBW_BLE;
@@ -490,10 +493,22 @@ void modem_analog_rx(void *this, p2G4_radioparams_t *rx_radioparams, double *Out
  *  rx_radioparams : Radio parameters/configuration of this receiver for this Rx/RSSI measurement
  *  SNR            : SNR level at the analog output as calculated by modem_analog_rx()
  */
-uint32_t modem_digital_perf_ber(void *this, p2G4_radioparams_t *rx_radioparams, double SNR) {
+uint32_t modem_digital_perf_ber(void *this, p2G4_modemdigparams_t *rx_modem_params, double SNR) {
   m_simple_status_t *mo_st = (m_simple_status_t *)this;
 
-  //Just the theoretical BER vs Eb/No | SNR:
+  double coding_gain = 0;
+
+  if (rx_modem_params->modulation == P2G4_MOD_BLE_CODED) {
+    //By now let's just offset the curve by 4 and 9dB respectively
+    //It is not too accurate, but much better than nothing
+    if (rx_modem_params->coding_rate == 2) { //S=2
+      coding_gain = 4;
+    } else { //S=8
+      coding_gain = 9;
+    }
+  }
+
+  //Just the theoretical BER vs Eb/No | SNR
   // BER = Q(sqrt(Eb/No)) = 1/2*erfc(sqrt(Eb/(2*No)))
 
   /*SNR = SNR - NFigure;
@@ -501,7 +516,7 @@ uint32_t modem_digital_perf_ber(void *this, p2G4_radioparams_t *rx_radioparams, 
     N_u_o = N_u + 10.^(NoiseFloor/10);
     SNR_2 = 10*log10(1./N_u_o); */
 
-  SNR = SNR - mo_st->args.NFigure_extra;
+  SNR = SNR - mo_st->args.NFigure_extra + coding_gain;
   double N_u = 1.0/pow(10.0,SNR/10.0); //equivalent noise level level relative to the signal power
   double N_u_o = N_u + pow(10.0, mo_st->args.NFloor_dig/10); //add the noise equivalent to the noise floor (relative to the singal power also)
 
@@ -527,7 +542,7 @@ uint32_t modem_digital_perf_ber(void *this, p2G4_radioparams_t *rx_radioparams, 
  *  SNR            : SNR level at the analog output as calculated by modem_analog_rx()
  *  tx_s           : Parameters of the transmission we are receiving (in case the sync. probability depends on any of them)
  */
-uint32_t modem_digital_perf_sync(void *this, p2G4_radioparams_t *rx_radioparams,
+uint32_t modem_digital_perf_sync(void *this, p2G4_modemdigparams_t *rx_modem_params,
                                  double SNR, p2G4_txv2_t* tx_s) {
   m_simple_status_t *mo_st = (m_simple_status_t *)this;
   mo_simple_args_t *args = &mo_st->args;
