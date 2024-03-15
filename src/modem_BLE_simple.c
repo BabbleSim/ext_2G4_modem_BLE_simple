@@ -492,6 +492,15 @@ void modem_analog_rx(void *this, p2G4_radioparams_t *rx_radioparams, double *Out
  *  this           : Pointer to this modem object
  *  rx_radioparams : Radio parameters/configuration of this receiver for this Rx/RSSI measurement
  *  SNR            : SNR level at the analog output as calculated by modem_analog_rx()
+ *
+ *
+ * Note: For coded modulations (BLE CodedPhy):
+ *   * The assumption is that this will be called for each "uncoded" bit (i.e. at a rate of 125
+ *     or 500kbps), and not for the underlying channel coded bits (i.e. at 1Mbps). That is, this
+ *     model accounts for the gain of the convolutional coding."
+ *   * Note that by now, for CodedPhy this will just provide an offset version of the 1Mbps
+ *     performance, to account roughly for the coding gain. More precise performance accounting
+ *     for a typical Viterbi decoder is pending.
  */
 uint32_t modem_digital_perf_ber(void *this, p2G4_modemdigparams_t *rx_modem_params, double SNR) {
   m_simple_status_t *mo_st = (m_simple_status_t *)this;
